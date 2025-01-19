@@ -1,0 +1,127 @@
+from PyQt6.QtCore import pyqtSlot  # Für die Definition von Slots (Signal-Empfänger)
+from PyQt6.QtGui import QFont  # Für die Schriftformatierung
+from PyQt6.QtWidgets import QWidget, QTextEdit, QVBoxLayout, QHBoxLayout, QPushButton  # Für die Benutzeroberfläche
+
+class CentralWidget(QWidget):
+    """
+    Dieses Widget bietet eine einfache Textbearbeitung mit Formatierungsoptionen
+    für Fett, Kursiv und Unterstrichen. Der Benutzer kann diese Funktionen über
+    Schaltflächen steuern.
+    """
+
+    def __init__(self, parent=None):
+        super(CentralWidget, self).__init__(parent)
+
+        # Layout für die Formatierungsschaltflächen
+        bar_layout = QHBoxLayout()
+
+        # Erstellen der Buttons für Bold, Italic und Underline
+        self.__pushbutton_bold = QPushButton('Bold')  # Schaltfläche für "Fett"
+        self.__pushbutton_italic = QPushButton('Italic')  # Schaltfläche für "Kursiv"
+        self.__pushbutton_underline = QPushButton('Underline')  # Schaltfläche für "Unterstrichen"
+
+        # Verbinden der Buttons mit den jeweiligen Methoden
+        self.__pushbutton_bold.pressed.connect(self.__bold)
+        self.__pushbutton_italic.pressed.connect(self.__italic)
+        self.__pushbutton_underline.pressed.connect(self.__underline)
+
+        # Hinzufügen der Buttons zum horizontalen Layout
+        bar_layout.addWidget(self.__pushbutton_bold)
+        bar_layout.addWidget(self.__pushbutton_italic)
+        bar_layout.addWidget(self.__pushbutton_underline)
+
+        # Textfeld für die Eingabe und Bearbeitung des Textes
+        self.__text_edit = QTextEdit()
+
+        # Vertikales Layout für das gesamte Widget
+        layout = QVBoxLayout()
+
+        # Hinzufügen der Schaltflächenleiste und des Textfeldes zum Layout
+        layout.addLayout(bar_layout)
+        layout.addWidget(self.__text_edit)
+
+        # Setzen des Layouts für das Widget
+        self.setLayout(layout)
+
+    @pyqtSlot(str)
+    def set_text(self, text):
+        """
+        Setzt den Text des Textfeldes.
+        :param text: Der Text, der angezeigt werden soll.
+        """
+        self.__text_edit.setText(text)
+
+    def get_text(self):
+        """
+        Gibt den aktuellen Text im Textfeld zurück.
+        :return: Der Text als String.
+        """
+        return self.__text_edit.toPlainText()
+
+    @pyqtSlot(QFont)
+    def set_font(self, font):
+        """
+        Setzt die Schriftart des Textfeldes.
+        :param font: Die gewünschte Schriftart.
+        """
+        self.__text_edit.setFont(font)
+
+    @pyqtSlot()
+    def __bold(self):
+        """
+        Schaltet die Fettschrift für den ausgewählten Text ein oder aus.
+        """
+        cursor = self.__text_edit.textCursor()  # Aktueller Textcursor
+        format = cursor.charFormat()  # Zeichenformat des Cursors
+        font = self.__pushbutton_bold.font()  # Schriftart des Buttons
+
+        if font.bold():  # Wenn die Schrift fett ist, schalte sie aus
+            format.setFontWeight(QFont.Weight.Normal)
+            font.setBold(False)
+        else:  # Wenn die Schrift nicht fett ist, schalte sie ein
+            format.setFontWeight(QFont.Weight.Bold)
+            font.setBold(True)
+
+        cursor.setCharFormat(format)  # Setze das neue Zeichenformat
+        self.__text_edit.setTextCursor(cursor)  # Aktualisiere den Textcursor
+        self.__pushbutton_bold.setFont(font)  # Aktualisiere die Schriftart des Buttons
+
+    @pyqtSlot()
+    def __italic(self):
+        """
+        Schaltet die Kursivschrift für den ausgewählten Text ein oder aus.
+        """
+        cursor = self.__text_edit.textCursor()  # Aktueller Textcursor
+        format = cursor.charFormat()  # Zeichenformat des Cursors
+        font = self.__pushbutton_italic.font()  # Schriftart des Buttons
+
+        if font.italic():  # Wenn die Schrift kursiv ist, schalte sie aus
+            format.setFontItalic(False)
+            font.setItalic(False)
+        else:  # Wenn die Schrift nicht kursiv ist, schalte sie ein
+            format.setFontItalic(True)
+            font.setItalic(True)
+
+        cursor.setCharFormat(format)  # Setze das neue Zeichenformat
+        self.__text_edit.setTextCursor(cursor)  # Aktualisiere den Textcursor
+        self.__pushbutton_italic.setFont(font)  # Aktualisiere die Schriftart des Buttons
+
+    @pyqtSlot()
+    def __underline(self):
+        """
+        Schaltet die Unterstreichung für den ausgewählten Text ein oder aus.
+        """
+        cursor = self.__text_edit.textCursor()  # Aktueller Textcursor
+        format = cursor.charFormat()  # Zeichenformat des Cursors
+        font = self.__pushbutton_underline.font()  # Schriftart des Buttons
+
+        if font.underline():  # Wenn die Schrift unterstrichen ist, schalte sie aus
+            format.setFontUnderline(False)
+            font.setUnderline(False)
+        else:  # Wenn die Schrift nicht unterstrichen ist, schalte sie ein
+            format.setFontUnderline(True)
+            font.setUnderline(True)
+
+        cursor.setCharFormat(format)  # Setze das neue Zeichenformat
+        self.__text_edit.setTextCursor(cursor)  # Aktualisiere den Textcursor
+        self.__pushbutton_underline.setFont(font)  # Aktualisiere die Schriftart des Buttons

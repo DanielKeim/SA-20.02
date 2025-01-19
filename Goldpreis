@@ -1,0 +1,77 @@
+from PyQt6.QtCharts import QChartView, QChart, QLineSeries, QDateTimeAxis, QValueAxis
+from PyQt6.QtCore import Qt, QDateTime
+
+class CentralWidget(QChartView):
+    """
+    Dieses Widget zeigt einen Vergleich der Goldpreise in Euro und Dollar als Liniendiagramm.
+    Es verwendet PyQt6-Chart-Komponenten, um eine interaktive und dynamische Visualisierung zu erstellen.
+    """
+
+    def __init__(self, parent=None):
+        super(CentralWidget, self).__init__(parent)
+
+        # Datenserie für Goldpreis in Euro
+        self.__series_euro = QLineSeries()  # Erstellt eine Linie für den Euro-Preis
+        self.__series_euro.setName("Goldpreis Euro")  # Benennt die Serie
+
+        # Beispiel-Daten (Datum und Preis)
+        dates = [
+            QDateTime(2024, 12, 15, 0, 0, 0),  # 15. Dezember 2024
+            QDateTime(2024, 12, 18, 0, 0, 0),  # 18. Dezember 2024
+            QDateTime(2025, 1, 7, 0, 0, 0),    # 7. Januar 2025
+            QDateTime(2025, 2, 2, 0, 0, 0)     # 2. Februar 2025
+        ]
+
+        # Werte für die Euro-Serie hinzufügen (x: Datum, y: Preis)
+        self.__series_euro.append(dates[0].toMSecsSinceEpoch(), 1500)  # 1500€ am 15.12.2024
+        self.__series_euro.append(dates[1].toMSecsSinceEpoch(), 1800)  # 1800€ am 18.12.2024
+        self.__series_euro.append(dates[2].toMSecsSinceEpoch(), 1900)  # 1900€ am 07.01.2025
+        self.__series_euro.append(dates[3].toMSecsSinceEpoch(), 2000)  # 2000€ am 02.02.2025
+
+        # Datenserie für Goldpreis in Dollar
+        self.__series_dollar = QLineSeries()  # Erstellt eine Linie für den Dollar-Preis
+        self.__series_dollar.setName("Goldpreis Dollar")  # Benennt die Serie
+
+        # Werte für die Dollar-Serie hinzufügen (x: Datum, y: Preis)
+        self.__series_dollar.append(dates[0].toMSecsSinceEpoch(), 1600)  # 1600$ am 15.12.2024
+        self.__series_dollar.append(dates[1].toMSecsSinceEpoch(), 1850)  # 1850$ am 18.12.2024
+        self.__series_dollar.append(dates[2].toMSecsSinceEpoch(), 1950)  # 1950$ am 07.01.2025
+        self.__series_dollar.append(dates[3].toMSecsSinceEpoch(), 2200)  # 2200$ am 02.02.2025
+
+        # Z-Achse für Dollar-Preise erstellen
+        z_axis = QValueAxis()
+        z_axis.setRange(1000, 2500)  # Bereich der Z-Achse (1000 - 2500)
+        z_axis.setTitleText("Preis in Dollar")  # Titel der Z-Achse
+
+        # X-Achse für Datum erstellen
+        x_axis = QDateTimeAxis()
+        x_axis.setFormat("dd.MM.yyyy")  # Datumsformat
+        x_axis.setTitleText("Datum")  # Titel der X-Achse
+        x_axis.setTickCount(5)  # Anzahl der sichtbaren Ticks
+
+        # Y-Achse für Euro-Preise erstellen
+        y_axis = QValueAxis()
+        y_axis.setRange(1000, 2500)  # Bereich der Y-Achse (1000 - 2500)
+        y_axis.setTitleText("Preis in €")  # Titel der Y-Achse
+
+        # Chart erstellen
+        chart = QChart()
+        chart.setWindowTitle("Goldpreis")  # Titel des Diagramms
+
+        # Serien zum Chart hinzufügen
+        chart.addSeries(self.__series_euro)  # Euro-Datenserie hinzufügen
+        chart.addSeries(self.__series_dollar)  # Dollar-Datenserie hinzufügen
+
+        # Achsen zum Chart hinzufügen
+        chart.addAxis(x_axis, Qt.AlignmentFlag.AlignBottom)  # X-Achse unten
+        chart.addAxis(y_axis, Qt.AlignmentFlag.AlignLeft)  # Y-Achse links
+        chart.addAxis(z_axis, Qt.AlignmentFlag.AlignRight)  # Z-Achse rechts
+
+        # Serien mit den Achsen verknüpfen
+        self.__series_euro.attachAxis(x_axis)  # Euro-Serie mit X- und Y-Achse verknüpfen
+        self.__series_euro.attachAxis(y_axis)
+        self.__series_dollar.attachAxis(x_axis)  # Dollar-Serie mit X- und Z-Achse verknüpfen
+        self.__series_dollar.attachAxis(z_axis)
+
+        # Chart in das QChartView setzen
+        self.setChart(chart)

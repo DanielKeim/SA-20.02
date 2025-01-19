@@ -1,47 +1,78 @@
-from PyQt6.QtCore import QTimer, QTime, pyqtSlot, Qt  # Import der notwendigen PyQt6-Module
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLCDNumber, QLineEdit, QPushButton, QLabel, QGridLayout
+
+from PyQt6.QtCore import QTimer, QTime, pyqtSlot, Qt  # Importiert notwendige PyQt6-Module für Timer, Zeit und Slots
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLCDNumber, QLineEdit, QPushButton, QLabel, QGridLayout  # Widgets für die Benutzeroberfläche
 
 class CentralWidget(QWidget):
+    """
+    Dieses Widget implementiert einen Countdown-Timer, bei dem der Benutzer eine Zeit in Sekunden eingibt.
+    Der Countdown wird gestartet und die verbleibende Zeit in einem digitalen Display angezeigt.
+    """
+
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        # Beschriftung für das Eingabefeld
-        self.input_label = QLabel("Gebe die Zeit in Sekunden ein:")  # Zeigt eine Aufforderung für den Benutzer
-        # Eingabefeld für die Zeit in Sekunden
-        self.input_field = QLineEdit()  # QLineEdit ermöglicht die Eingabe von Text
-        self.input_field.setPlaceholderText("z.B. 10")  # Grauer Platzhaltertext, wenn das Feld leer ist
+        # Label, um den Benutzer zur Eingabe von Sekunden aufzufordern
+        self.input_label = QLabel("Gebe die Zeit in Sekunden ein:")
+        # Eingabefeld für die Sekunden
+        self.input_field = QLineEdit()
+        self.input_field.setPlaceholderText("z.B.10")  # Platzhaltertext, wenn das Feld leer ist
 
-        # LCD-Anzeige für den Countdown
-        self.lcd_display = QLCDNumber()  # Zeigt die Zeit im digitalen Format an
-        self.lcd_display.display("00:00:00")  # Standardanzeige (Stunden:Minuten:Sekunden)
+        # LCD-Display, um die verbleibende Zeit anzuzeigen
+        self.lcd_display = QLCDNumber()
+        self.lcd_display.display("00:00:00")  # Initiale Anzeige (Stunden:Minuten:Sekunden)
 
-        # Start-Button
-        self.start_button = QPushButton("Start Countdown")  # Button, um den Countdown zu starten
+        # Button zum Starten des Countdowns
+        self.start_button = QPushButton("Start Countdown")
         self.start_button.clicked.connect(self.start_countdown)  # Verknüpft den Button mit der Startfunktion
 
         # Layout für die Anordnung der Widgets
-        layout = QGridLayout()  # Raster-Layout für die Widgets
-        layout.addWidget(self.input_label, 0, 0)  # Beschriftung oben
-        layout.addWidget(self.input_field, 1, 0)  # Eingabefeld darunter
-        layout.addWidget(self.lcd_display)  # LCD-Anzeige
+        layout = QGridLayout()  # Raster-Layout
+        layout.addWidget(self.input_label, 0, 0)  # Label in der ersten Zeile, erste Spalte
+        layout.addWidget(self.input_field, 1, 0)  # Eingabefeld in der zweiten Zeile, erste Spalte
+        layout.addWidget(self.lcd_display)  # LCD-Display
         layout.addWidget(self.start_button)  # Start-Button
 
-        # QTimer-Instanz für den Countdown
-        self.timer = QTimer()  # Timer, der jede Sekunde ein Signal auslöst
-        self.timer.timeout.connect(self.update_countdown)  # Verknüpfung des Timers mit der Aktualisierungsfunktion
-        self.time_left = QTime(0, 0, 0)  # Initialisierung der verbleibenden Zeit auf 0 Sekunden
+        # Timer für den Countdown
+        self.timer = QTimer()  # Timer-Objekt
+        self.timer.timeout.connect(self.update_countdown)  # Verknüpft den Timer mit der Aktualisierungsfunktion
+        self.time_left = QTime(0, 0, 0)  # Initialisiert die verbleibende Zeit auf 0 Sekunden
 
-        # Setze das Layout für das Widget
+        # Setzt das Layout für das Widget
         self.setLayout(layout)
 
-    @pyqtSlot()  # Dekorator für Slots (Signal-Empfänger)
+    @pyqtSlot()
     def start_countdown(self):
         """
         Startet den Countdown-Timer basierend auf der Benutzereingabe.
-        Sperrt den Button, bis der Countdown endet.
+        Sperrt den Start-Button, bis der Countdown endet.
         """
         try:
-            # Lese die Eingabezeit (in Sekunden) und initialisiere die Countdown-Zeit
-            seconds = int(self.input_field.text())  # Konvertiert den eingegebenen Text in eine Ganzzahl
-            self.time_left = QTime(0, 0, seconds)  # Setzt die Countdown-Zeit
-            self.lcd_display.display(self.time_left
+            # Lese die Eingabezeit (in Sekunden) aus dem Eingabefeld
+            seconds = int(self.input_field.text())
+            # Initialisiere die Countdown-Zeit mit den angegebenen Sekunden
+            self.time_left = QTime(0, 0, seconds)
+            # Aktualisiere die LCD-Anzeige mit der formatierten Zeit
+            self.lcd_display.display(self.time_left.toString("hh:mm:ss"))
+            # Starte den Timer mit einem Intervall von 1 Sekunde
+            self.timer.start(1000)
+            # Deaktiviere den Start-Button, solange der Countdown läuft
+            self.start_button.setEnabled(False)
+        except ValueError:
+            # Falls die Eingabe keine gültige Zahl ist, zeige eine Fehlermeldung im Label
+            self.input_label.setText("Ungültige Zahl")
+
+    @pyqtSlot()
+    def update_countdown(self):
+        """
+        Diese Methode wird jede Sekunde vom Timer aufgerufen.
+        Sie aktualisiert die verbleibende Zeit und beendet den Countdown, wenn die Zeit abgelaufen ist.
+        """
+        if self.time_left == QTime(0, 0, 0):  # Überprüft, ob die Zeit abgelaufen ist
+            self.timer.stop()  # Stoppt den Timer
+            self.start_button.setEnabled(True)  # Aktiviert den Start-Button wieder
+            self.input_label.setText("Countdown beendet")  # Zeigt eine Nachricht im Label an
+        else:
+            # Reduziert die verbleibende Zeit um 1 Sekunde
+            self.time_left = self.time_left.addSecs(-1)
+            # Aktualisiert die LCD-Anzeige mit der neuen verbleibenden Zeit
+            self.lcd_display.display(self.time_left.toString("hh:mm:ss"))

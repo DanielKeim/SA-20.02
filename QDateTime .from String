@@ -1,0 +1,28 @@
+from PyQt6.QtCore import QDateTime  # Import für Datum und Zeit
+from PyQt6.QtWidgets import QWidget  # Import für die Erstellung eines Widgets
+
+class CentralWidget(QWidget):
+    """
+    Dieses Widget überprüft, ob ein gegebenes Datum (als String) gültig ist,
+    basierend auf einem angegebenen Datumsformat. Das Ergebnis wird in der Konsole ausgegeben.
+    """
+
+    def __init__(self, parent=None):
+        super(CentralWidget, self).__init__(parent)
+
+        # Der Datumsstring, der überprüft werden soll
+        date_string = "21.05.2025"  # Datum im Format "dd.MM.yyyy"
+
+        # Das Format, das der Datumsstring verwenden soll
+        format_string = "dd:MM:yyyy"  # Fälschlicherweise ":" statt "." als Trenner
+
+        # Umwandlung des Datumsstrings in ein QDateTime-Objekt
+        date_time = QDateTime.fromString(date_string, format_string)
+
+        # Überprüfung, ob das Datum gültig ist
+        if date_time.isValid():
+            # Wenn das Datum gültig ist, gib es aus
+            print("Datum:", date_time.toString())  # Gibt das Datum in einem Standardformat aus
+        else:
+            # Wenn das Datum ungültig ist, gib eine Fehlermeldung aus
+            print("ungültiges Datum")

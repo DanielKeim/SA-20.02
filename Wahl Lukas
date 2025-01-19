@@ -1,0 +1,109 @@
+from PyQt6.QtCharts import QChartView, QChart, QLineSeries, QDateTimeAxis, QValueAxis
+from PyQt6.QtCore import Qt, QDateTime
+from PyQt6.QtGui import QColor
+
+class CentralWidget(QChartView):
+    """
+    Dieses Widget zeigt eine Wahlumfrage für die Bundestagswahl als Liniendiagramm.
+    Die Datenpunkte repräsentieren den Prozentsatz der Stimmen für verschiedene Parteien
+    über einen bestimmten Zeitraum.
+    """
+
+    def __init__(self, parent=None):
+        super(CentralWidget, self).__init__(parent)
+
+        # Erstellen der Liniendaten für die Parteien
+        self.__line_series_union = QLineSeries()  # Daten für die Union
+        self.__line_series_afd = QLineSeries()  # Daten für die AfD
+        self.__line_series_spd = QLineSeries()  # Daten für die SPD
+        self.__line_series_gruene = QLineSeries()  # Daten für die Grünen
+
+        # Farben der Linien festlegen
+        self.__line_series_union.setColor(QColor(1, 0, 0))  # Union: Rot
+        self.__line_series_afd.setColor(QColor(135, 206, 235))  # AfD: Hellblau
+        self.__line_series_spd.setColor(QColor(255, 0, 0))  # SPD: Dunkelrot
+        self.__line_series_gruene.setColor(QColor(0, 255, 0))  # Grüne: Grün
+
+        # Datenpunkte (Datum und Prozentsatz) hinzufügen
+        dates = [
+            QDateTime(2024, 12, 15, 0, 0, 0),
+            QDateTime(2024, 12, 22, 0, 0, 0),
+            QDateTime(2024, 12, 29, 0, 0, 0),
+            QDateTime(2025, 1, 5, 0, 0, 0),
+            QDateTime(2025, 1, 12, 0, 0, 0)
+        ]
+
+        # Union-Daten
+        self.__line_series_union.append(dates[0].toMSecsSinceEpoch(), 30)
+        self.__line_series_union.append(dates[1].toMSecsSinceEpoch(), 31)
+        self.__line_series_union.append(dates[2].toMSecsSinceEpoch(), 32)
+        self.__line_series_union.append(dates[3].toMSecsSinceEpoch(), 31)
+        self.__line_series_union.append(dates[4].toMSecsSinceEpoch(), 30)
+
+        # AfD-Daten
+        self.__line_series_afd.append(dates[0].toMSecsSinceEpoch(), 19)
+        self.__line_series_afd.append(dates[1].toMSecsSinceEpoch(), 20)
+        self.__line_series_afd.append(dates[2].toMSecsSinceEpoch(), 21)
+        self.__line_series_afd.append(dates[3].toMSecsSinceEpoch(), 22)
+        self.__line_series_afd.append(dates[4].toMSecsSinceEpoch(), 21)
+
+        # SPD-Daten
+        self.__line_series_spd.append(dates[0].toMSecsSinceEpoch(), 13)
+        self.__line_series_spd.append(dates[1].toMSecsSinceEpoch(), 14)
+        self.__line_series_spd.append(dates[2].toMSecsSinceEpoch(), 15)
+        self.__line_series_spd.append(dates[3].toMSecsSinceEpoch(), 16)
+        self.__line_series_spd.append(dates[4].toMSecsSinceEpoch(), 15)
+
+        # Grüne-Daten
+        self.__line_series_gruene.append(dates[0].toMSecsSinceEpoch(), 12)
+        self.__line_series_gruene.append(dates[1].toMSecsSinceEpoch(), 13)
+        self.__line_series_gruene.append(dates[2].toMSecsSinceEpoch(), 14)
+        self.__line_series_gruene.append(dates[3].toMSecsSinceEpoch(), 13)
+        self.__line_series_gruene.append(dates[4].toMSecsSinceEpoch(), 12)
+
+        # Erstellen der X-Achse (Datum)
+        x_axis = QDateTimeAxis()
+        x_axis.setFormat("dd.MM.yyyy")  # Datumsformat
+        x_axis.setTitleText("Datum")  # Beschriftung der Achse
+        x_axis.setTickCount(5)  # Anzahl der Tickpunkte
+
+        # Erstellen der Y-Achse (Prozentwerte)
+        y_axis = QValueAxis()
+        y_axis.setRange(0, 40)  # Wertebereich der Achse
+        y_axis.setTitleText("Prozentanteil")  # Beschriftung der Achse
+
+        # Erstellen des Diagramms
+        chart = QChart()
+        chart.setWindowTitle('Wahlumfrage Bundestagswahl')  # Titel des Diagramms
+
+        # Hinzufügen der Datenserien
+        chart.addSeries(self.__line_series_union)
+        chart.addSeries(self.__line_series_afd)
+        chart.addSeries(self.__line_series_spd)
+        chart.addSeries(self.__line_series_gruene)
+
+        # Hinzufügen der Achsen
+        chart.addAxis(x_axis, Qt.AlignmentFlag.AlignBottom)  # X-Achse unten
+        chart.addAxis(y_axis, Qt.AlignmentFlag.AlignLeft)  # Y-Achse links
+
+        # Verknüpfung der Datenserien mit den Achsen
+        self.__line_series_union.attachAxis(x_axis)
+        self.__line_series_union.attachAxis(y_axis)
+
+        self.__line_series_afd.attachAxis(x_axis)
+        self.__line_series_afd.attachAxis(y_axis)
+
+        self.__line_series_spd.attachAxis(x_axis)
+        self.__line_series_spd.attachAxis(y_axis)
+
+        self.__line_series_gruene.attachAxis(x_axis)
+        self.__line_series_gruene.attachAxis(y_axis)
+
+        # Setze das Diagramm in das QChartView
+        self.setChart(chart)
+
+        # Beschriftungen der Serien
+        self.__line_series_union.setName("Union")
+        self.__line_series_afd.setName("AfD")
+        self.__line_series_spd.setName("SPD")
+        self.__line_series_gruene.setName("Grüne")

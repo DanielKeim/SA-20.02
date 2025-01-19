@@ -1,0 +1,41 @@
+from PyQt6.QtCore import QTimer, QTime, pyqtSlot, Qt  # Import für Zeit und Signale
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLCDNumber, QLineEdit, QPushButton, QLabel, QGridLayout, QComboBox
+
+class CentralWidget(QWidget):
+    """
+    Dieses Widget zeigt ein Beispiel für die Verwendung einer ComboBox (Dropdown-Menü).
+    Der Benutzer kann eine Option aus dem Dropdown-Menü auswählen, und das Label wird entsprechend aktualisiert.
+    """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Erstellen einer ComboBox (Dropdown-Menü)
+        self.combo_box = QComboBox()
+        self.combo_box.addItem("Option 1")  # Erste Option hinzufügen
+        self.combo_box.addItem("Option 2")  # Zweite Option hinzufügen
+        self.combo_box.addItem("Option 3")  # Dritte Option hinzufügen
+
+        # Label, um die aktuelle Auswahl anzuzeigen
+        self.label = QLabel("Bitte wählen Sie eine Option.")  # Standardtext des Labels
+
+        # Verbindung des Signals 'currentIndexChanged' zu einer Methode
+        # Dieses Signal wird ausgelöst, wenn der Benutzer die Auswahl ändert
+        self.combo_box.currentIndexChanged.connect(self.update_label)
+
+        # Layout für das Fenster
+        layout = QVBoxLayout()  # Vertikales Layout
+        layout.addWidget(self.combo_box)  # Füge die ComboBox zum Layout hinzu
+        layout.addWidget(self.label)  # Füge das Label zum Layout hinzu
+
+        # Einstellungen für das Widget-Fenster
+        self.setLayout(layout)  # Setze das Layout für das Widget
+        self.setWindowTitle("ComboBox Beispiel")  # Fenster-Titel
+        self.setGeometry(100, 100, 300, 200)  # Fenstergröße und Position
+
+    def update_label(self):
+        """
+        Aktualisiert das Label basierend auf der Auswahl des Benutzers in der ComboBox.
+        """
+        selected_option = self.combo_box.currentText()  # Holt den aktuell ausgewählten Text
+        self.label.setText(f"Ausgewählte Option: {selected_option}")  # Aktualisiert den Text des Labels

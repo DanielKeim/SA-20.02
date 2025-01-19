@@ -1,0 +1,47 @@
+from PyQt6.QtCore import QTimer, QTime, pyqtSlot, Qt  # Import der notwendigen PyQt6-Module
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLCDNumber, QLineEdit, QPushButton, QLabel, QGridLayout
+
+class CentralWidget(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Beschriftung für das Eingabefeld
+        self.input_label = QLabel("Gebe die Zeit in Sekunden ein:")  # Zeigt eine Aufforderung für den Benutzer
+        # Eingabefeld für die Zeit in Sekunden
+        self.input_field = QLineEdit()  # QLineEdit ermöglicht die Eingabe von Text
+        self.input_field.setPlaceholderText("z.B. 10")  # Grauer Platzhaltertext, wenn das Feld leer ist
+
+        # LCD-Anzeige für den Countdown
+        self.lcd_display = QLCDNumber()  # Zeigt die Zeit im digitalen Format an
+        self.lcd_display.display("00:00:00")  # Standardanzeige (Stunden:Minuten:Sekunden)
+
+        # Start-Button
+        self.start_button = QPushButton("Start Countdown")  # Button, um den Countdown zu starten
+        self.start_button.clicked.connect(self.start_countdown)  # Verknüpft den Button mit der Startfunktion
+
+        # Layout für die Anordnung der Widgets
+        layout = QGridLayout()  # Raster-Layout für die Widgets
+        layout.addWidget(self.input_label, 0, 0)  # Beschriftung oben
+        layout.addWidget(self.input_field, 1, 0)  # Eingabefeld darunter
+        layout.addWidget(self.lcd_display)  # LCD-Anzeige
+        layout.addWidget(self.start_button)  # Start-Button
+
+        # QTimer-Instanz für den Countdown
+        self.timer = QTimer()  # Timer, der jede Sekunde ein Signal auslöst
+        self.timer.timeout.connect(self.update_countdown)  # Verknüpfung des Timers mit der Aktualisierungsfunktion
+        self.time_left = QTime(0, 0, 0)  # Initialisierung der verbleibenden Zeit auf 0 Sekunden
+
+        # Setze das Layout für das Widget
+        self.setLayout(layout)
+
+    @pyqtSlot()  # Dekorator für Slots (Signal-Empfänger)
+    def start_countdown(self):
+        """
+        Startet den Countdown-Timer basierend auf der Benutzereingabe.
+        Sperrt den Button, bis der Countdown endet.
+        """
+        try:
+            # Lese die Eingabezeit (in Sekunden) und initialisiere die Countdown-Zeit
+            seconds = int(self.input_field.text())  # Konvertiert den eingegebenen Text in eine Ganzzahl
+            self.time_left = QTime(0, 0, seconds)  # Setzt die Countdown-Zeit
+            self.lcd_display.display(self.time_left

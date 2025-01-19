@@ -1,0 +1,107 @@
+from PyQt6.QtCore import QTime, QTimer
+from PyQt6.QtWidgets import QWidget, QGridLayout, QLabel, QLineEdit, QPushButton, QTimeEdit, QLCDNumber, QRadioButton, QTextBrowser
+
+class CentralWidget(QWidget):
+    """
+    Dieses Widget ist ein zentraler Bestandteil einer Poker-Helper-Anwendung.
+    Es implementiert eine Timer-Funktion, mit der Blinds nach Ablauf einer bestimmten Zeit erhöht werden.
+    Der Benutzer kann zwischen prozentualer und absoluter Blind-Erhöhung wählen.
+    Während der Timer läuft, sind alle Eingaben deaktiviert, um versehentliche Änderungen zu vermeiden.
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        # Timer und Zeitinitialisierung
+        self.timer = QTimer()  # Ein Timer, der alle 1 Sekunde ein Signal auslösen kann
+        self.timer.timeout.connect(self.update_timer)  # Verknüpfung des Timers mit der Update-Funktion
+        self.time_left = QTime(0, 0, 5)  # Standardzeit für den Timer: 5 Sekunden
+
+        # Widgets erstellen (Eingabefelder, Labels, Buttons etc.)
+        self.blind_input = QLineEdit("50.00")  # Eingabefeld für die aktuelle Blindhöhe
+        self.raise_percent_input = QLineEdit("15.3")  # Eingabefeld für die prozentuale Erhöhung
+        self.raise_euro_input = QLineEdit("10.00")  # Eingabefeld für die absolute Erhöhung in Euro
+
+        self.time_edit = QTimeEdit(self.time_left)  # Eingabefeld für die Timerzeit
+        self.time_edit.setDisplayFormat("hh:mm:ss")  # Anzeigeformat für Stunden, Minuten und Sekunden
+
+        self.start_button = QPushButton("Start")  # Start-Button
+        self.start_button.clicked.connect(self.start_timer)  # Verknüpft mit der Start-Funktion des Timers
+
+        self.lcd_display = QLCDNumber()  # Digitalanzeige für die verbleibende Zeit
+        self.lcd_display.display(self.time_left.toString("hh:mm:ss"))  # Zeigt die Startzeit an
+
+        self.radio_percent = QRadioButton("Raise in %")  # Radio-Button für prozentuale Blind-Erhöhung
+        self.radio_euro = QRadioButton("Raise in €")  # Radio-Button für absolute Erhöhung in Euro
+
+        self.text_browser = QTextBrowser()  # Textbereich, um Nachrichten anzuzeigen
+        self.text_browser.append("Ready")  # Initialnachricht
+
+        # Layout erstellen (Widgets anordnen)
+        layout = QGridLayout()
+        layout.addWidget(QLabel("Blind in €"), 0, 0)  # Label für Blind
+        layout.addWidget(self.blind_input, 0, 1)  # Eingabefeld für Blind
+
+        layout.addWidget(QLabel("Raise Time"), 1, 0)  # Label für Zeit
+        layout.addWidget(self.time_edit, 1, 1)  # Eingabefeld für Timerzeit
+
+        layout.addWidget(self.radio_percent, 2, 0)  # Radio-Button für prozentuale Erhöhung
+        layout.addWidget(self.raise_percent_input, 2, 1)  # Eingabefeld für prozentuale Erhöhung
+
+        layout.addWidget(self.radio_euro, 3, 0)  # Radio-Button für absolute Erhöhung
+        layout.addWidget(self.raise_euro_input, 3, 1)  # Eingabefeld für absolute Erhöhung
+
+        layout.addWidget(self.start_button, 0, 2)  # Start-Button
+        layout.addWidget(self.lcd_display, 1, 2)  # Anzeige der verbleibenden Zeit
+        layout.addWidget(self.text_browser, 4, 0, 1, 3)  # Textbereich für Nachrichten
+
+        self.setLayout(layout)  # Setzt das Layout für das Widget
+
+    def start_timer(self):
+        """
+        Startet den Timer und deaktiviert alle Eingabefelder, um Änderungen während des Timers zu verhindern.
+        """
+        self.start_button.setText("Stop")  # Ändert den Text des Buttons
+        self.start_button.clicked.disconnect()  # Entfernt die bisherige Verbindung des Buttons
+        self.start_button.clicked.connect(self.stop_timer)  # Verknüpft den Button mit der Stop-Funktion
+
+        self.set_inputs_enabled(False)  # Deaktiviert alle Eingabefelder
+
+        self.time_left = self.time_edit.time()  # Setzt die verbleibende Zeit auf die Eingabezeit
+        self.timer.start(1000)  # Startet den Timer mit einem Intervall von 1 Sekunde
+
+    def stop_timer(self):
+        """
+        Stoppt den Timer und aktiviert die Eingabefelder wieder.
+        """
+        self.start_button.setText("Start")  # Ändert den Text des Buttons zurück
+        self.start_button.clicked.disconnect()  # Entfernt die bisherige Verbindung des Buttons
+        self.start_button.clicked.connect(self.start_timer)  # Verknüpft den Button mit der Start-Funktion
+
+        self.set_inputs_enabled(True)  # Aktiviert alle Eingabefelder
+
+        self.timer.stop()  # Stoppt den Timer
+        self.lcd_display.display(self.time_edit.time().toString("hh:mm:ss"))  # Setzt die Anzeigezeit zurück
+
+    def update_timer(self):
+        """
+        Wird jede Sekunde vom Timer aufgerufen. Verringert die Zeit um 1 Sekunde
+        und erhöht die Blindwerte, wenn die Zeit abgelaufen ist.
+        """
+        if self.time_left == QTime(0, 0, 0):  # Überprüft, ob die Zeit abgelaufen ist
+            self.time_left = self.time_edit.time()  # Setzt die Zeit auf den ursprünglichen Wert zurück
+            self.text_browser.append("Blind raised.")  # Fügt eine Nachricht hinzu
+        else:
+            self.time_left = self.time_left.addSecs(-1)  # Reduziert die Zeit um 1 Sekunde
+
+        self.lcd_display.display(self.time_left.toString("hh:mm:ss"))  # Aktualisiert die Zeit auf der Anzeige
+
+    def set_inputs_enabled(self, enabled):
+        """
+        Aktiviert oder deaktiviert die Eingabefelder und Radio-Buttons basierend auf dem `enabled`-Parameter.
+        """
+        self.blind_input.setEnabled(enabled)
+        self.raise_percent_input.setEnabled(enabled)
+        self.raise_euro_input.setEnabled(enabled)
+        self.time_edit.setEnabled(enabled)
+        self.radio_percent.setEnabled(enabled)
+        self.radio_euro.setEnabled(enabled)

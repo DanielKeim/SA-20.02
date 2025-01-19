@@ -1,0 +1,30 @@
+from PyQt6.QtCore import QDateTime  # Import für Datum und Zeit
+
+# Beispiel-String mit Datum und Uhrzeit
+date_string = "2025-01-17T14:30:00"  # ISO-8601-Format: "Jahr-Monat-TagTStunden:Minuten:Sekunden"
+format_string = "yyyy-MM-ddThh:mm:ss"  # Entsprechendes Format für die Konvertierung
+
+# Konvertiere den String in ein QDateTime-Objekt
+date_time = QDateTime.fromString(date_string, format_string)
+
+if date_time.isValid():  # Überprüfen, ob das Datum gültig ist
+    # Konvertiere das Datum in einen String im gleichen Format
+    output_string = date_time.toString(format_string)
+    
+    # Zerlege den String in Bestandteile anhand der Bindestriche
+    parts = output_string.split("-")
+
+    year = parts[0]  # Jahr: "2025"
+    month = parts[1]  # Monat: "01"
+    day_time = parts[2]  # Tag und Uhrzeit: "17T14:30:00"
+
+    # Zerlege den Tag und die Uhrzeit am Buchstaben "T"
+    day, time = day_time.split("T")
+
+    # Ausgabe der einzelnen Bestandteile
+    print("Jahr:", year)       # Ausgabe: 2025
+    print("Monat:", month)     # Ausgabe: 01
+    print("Tag:", day)         # Ausgabe: 17
+    print("Uhrzeit:", time)    # Ausgabe: 14:30:00
+else:
+    print("Ungültiges Datum!")  # Fehlermeldung, falls der String nicht konvertiert werden konnte
